@@ -20,6 +20,8 @@ Pacman agents (in searchAgents.py).
 import util
 from util import *
 
+import copy
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -92,30 +94,34 @@ def depthFirstSearch(problem):
     stateStack = Stack()
     previous = Queue()
     holder = Queue()
-
-    # Create stack that contains states
-    # While it is not currently at goal state,
-        # Iterate through each piece of stack
-            # Pop item
-            # Get successors
-            # if successors have never been searched before,
-                # push its successors
-            # else,
-                # skip successor
     
 
     currState = problem.getStartState()
-    stateStack.push(currState)
+    # stateStack.push(currState)
 
-    while not problem.isGoalState(currState) and not stateStack.isEmpty():
-        currState = stateStack.pop()
+    while not problem.isGoalState(currState):
+        # currState = stateStack.pop()
+        stateStack.push(currState)
         previous.push(currState)
+        hasSuccessors = False
 
+        printStack = copy.deepcopy(stateStack)
+        print ('Printing stateStack')
+        while not printStack.isEmpty():
+            print(printStack.pop())
+
+        print ('\ncurrState: ', currState)
+        print ('Pushing {} to previous stack'.format(currState))
+
+        # Check each successor state
         for state in problem.getSuccessors(currState):
+            print ('\tstate: ', state[0])
             isCopy = False
 
+            print ('\tPrev list: ')
             while not previous.isEmpty():
                 prev = previous.pop()
+                print ('\t\t', prev)
                 holder.push(prev)
 
                 if prev == state[0]: isCopy = True
@@ -124,13 +130,26 @@ def depthFirstSearch(problem):
 
             if isCopy: continue
 
+            print ('\tPushing ', state[0])
             stateStack.push(state[0])
-            currState = state[0]
+            hasSuccessors = True
 
+        
+        if not hasSuccessors: stateStack.pop()
+        currState = stateStack.pop()
+
+        
     moves = []
-    while not previous.isEmpty():
-        moves.append(previous.pop())
+    while not stateStack.isEmpty():
+        moves.insert(0, stateStack.pop())
     moves.append(currState)
+
+    print(moves)
+
+    for i in range(0, len(moves) - 1):
+        moves[i] = (moves[i + 1][0] - moves[i][0], moves[i + 1][1] - moves[i][1])
+    moves.pop()
+    print(moves)
 
     return moves
 
