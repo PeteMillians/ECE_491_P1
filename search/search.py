@@ -18,7 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-from util import Stack
+from util import *
 
 class SearchProblem:
     """
@@ -88,26 +88,51 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    print ("Start:", problem.getStartState())
-    print ("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print ("Start's successors:", problem.getSuccessors(problem.getStartState()))
 
     stateStack = Stack()
+    previous = Queue()
+    holder = Queue()
 
     # Create stack that contains states
     # While it is not currently at goal state,
         # Iterate through each piece of stack
-            # Pop item, push its successors
+            # Pop item
+            # Get successors
+            # if successors have never been searched before,
+                # push its successors
+            # else,
+                # skip successor
+    
 
     currState = problem.getStartState()
     stateStack.push(currState)
-    while not problem.isGoalState(currState):
-        currState = stateStack.pop()
-        for state in problem.getSuccessors(currState):
-            stateStack.push(state)
-            currState = state
 
-    # util.raiseNotDefined()
+    while not problem.isGoalState(currState) and not stateStack.isEmpty():
+        currState = stateStack.pop()
+        previous.push(currState)
+
+        for state in problem.getSuccessors(currState):
+            isCopy = False
+
+            while not previous.isEmpty():
+                prev = previous.pop()
+                holder.push(prev)
+
+                if prev == state[0]: isCopy = True
+
+            while not holder.isEmpty(): previous.push(holder.pop())
+
+            if isCopy: continue
+
+            stateStack.push(state[0])
+            currState = state[0]
+
+    moves = []
+    while not previous.isEmpty():
+        moves.append(previous.pop())
+    moves.append(currState)
+
+    return moves
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
