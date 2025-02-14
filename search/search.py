@@ -91,67 +91,67 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
 
+    # Create stack for node expansion
+    # Create set of expanded nodes
+    # Create actions dictionary
+    # create parentPath dictionary
+    #
+    # NEED TO MAKE SURE A STRAIGHT PATH TO THE GOAL IS LEFT IN A LIST
+    #
+    # Push the starting value onto stack
+    # Add starting value to list
+    #
+    # While there are values in the stack,
+        # Pop value from stack
+        # If value is goal,
+            # return the path to the goal using parentPath and actions dictionaries
+        # Else,
+            # for each successor of value,
+                # If successor is not in expanded list,
+                    # Push to stack
+                    # Add to expanded list
+                    # Add successor and parent to parentPath
+                    # Add parent to successor action to actions
+                    # LOGS EVERY PATH TRAVELED IN A DICTIONARY MAP
+                # Else
+                    # Skip successor
+
     stateStack = Stack()
-    previous = Queue()
-    holder = Queue()
+    expanded = set()
+    actions = {}
+    parentMap = {}
     
+    # Initialize stack with starting position
+    startState = problem.getStartState()
+    stateStack.push(startState)
 
-    currState = problem.getStartState()
-    # stateStack.push(currState)
-
-    while not problem.isGoalState(currState):
-        # currState = stateStack.pop()
-        stateStack.push(currState)
-        previous.push(currState)
-        hasSuccessors = False
-
-        printStack = copy.deepcopy(stateStack)
-        print ('Printing stateStack')
-        while not printStack.isEmpty():
-            print(printStack.pop())
-
-        print ('\ncurrState: ', currState)
-        print ('Pushing {} to previous stack'.format(currState))
-
-        # Check each successor state
-        for state in problem.getSuccessors(currState):
-            print ('\tstate: ', state[0])
-            isCopy = False
-
-            print ('\tPrev list: ')
-            while not previous.isEmpty():
-                prev = previous.pop()
-                print ('\t\t', prev)
-                holder.push(prev)
-
-                if prev == state[0]: isCopy = True
-
-            while not holder.isEmpty(): previous.push(holder.pop())
-
-            if isCopy: continue
-
-            print ('\tPushing ', state[0])
-            stateStack.push(state[0])
-            hasSuccessors = True
-
-        
-        if not hasSuccessors: stateStack.pop()
-        currState = stateStack.pop()
-
-        
-    moves = []
+    # Add starting position to expanded set
+    expanded.add(startState)
+    
+    # While the graph is not empty
     while not stateStack.isEmpty():
-        moves.insert(0, stateStack.pop())
-    moves.append(currState)
-
-    print(moves)
-
-    for i in range(0, len(moves) - 1):
-        moves[i] = (moves[i + 1][0] - moves[i][0], moves[i + 1][1] - moves[i][1])
-    moves.pop()
-    print(moves)
-
-    return moves
+        currState = stateStack.pop()
+        
+        if problem.isGoalState(currState):
+            # Try to construct a path to the goal
+            path = []
+            while currState != startState:
+                action = actions[currState]
+                path.insert(0, action)
+                currState = parentMap[currState]
+            # path.reverse()  
+            return path
+        
+        # Expand children
+        for successor, action, empty in problem.getSuccessors(currState):
+            # Check if we have expanded this node before
+            if successor not in expanded:
+                expanded.add(successor)
+                stateStack.push(successor)
+                parentMap[successor] = currState  
+                actions[successor] = action  
+                
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
