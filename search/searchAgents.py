@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.cornersExpanded = set()
 
     def getStartState(self):
         """
@@ -295,14 +296,30 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # Not working because it doesn't want to expand the same node twice...
+        # Ideas:
+        #   1) Any food is a goal state. Once it reaches a goal, set new start state to that 
+        #      position and look for next food
+        #   2) 
+
+        isGoal = True
+
+        if state in self.corners:
+            self.cornersExpanded.add(state)
+            print (state)
+
+        for corner in self.corners:
+            if corner not in self.cornersExpanded: isGoal = False
+
+        return isGoal
 
     def getSuccessors(self, state):
         """
@@ -326,7 +343,14 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
 
-        self._expanded += 1 # DO NOT CHANGE
+            x,y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                cost = 1
+                successors.append( ( nextState, action, cost) )
+
         return successors
 
     def getCostOfActions(self, actions):
