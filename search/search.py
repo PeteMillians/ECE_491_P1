@@ -139,7 +139,6 @@ def depthFirstSearch(problem):
                 action = actions[currState]
                 path.insert(0, action)
                 currState = parentMap[currState]
-            # path.reverse()  
             return path
         
         # Expand children
@@ -156,12 +155,81 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stateQueue = Queue()
+    expanded = set()
+    actions = {}
+    parentMap = {}
+    
+    # Initialize stack with starting position
+    startState = problem.getStartState()
+    stateQueue.push(startState)
+
+    # Add starting position to expanded set
+    expanded.add(startState)
+    
+    # While the graph is not empty
+    while not stateQueue.isEmpty():
+        currState = stateQueue.pop()
+        
+        if problem.isGoalState(currState):
+            # Try to construct a path to the goal
+            path = []
+            while currState != startState:
+                action = actions[currState]
+                path.insert(0, action)
+                currState = parentMap[currState]
+            return path
+        
+        # Expand children
+        for successor, action, empty in problem.getSuccessors(currState):
+            # Check if we have expanded this node before
+            if successor not in expanded:
+                expanded.add(successor)
+                stateQueue.push(successor)
+                parentMap[successor] = currState  
+                actions[successor] = action  
+                
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stateStack = PriorityQueue()
+    expanded = set()
+    actions = {}
+    parentMap = {}
+    
+    # Initialize stack with starting position
+    startState = problem.getStartState()
+    stateStack.push(startState, 0)
+
+    # Add starting position to expanded set
+    expanded.add(startState)
+    
+    # While the graph is not empty
+    while not stateStack.isEmpty():
+        currState = stateStack.pop()
+        
+        if problem.isGoalState(currState):
+            # Try to construct a path to the goal
+            path = []
+            while currState != startState:
+                action = actions[currState]
+                path.insert(0, action)
+                currState = parentMap[currState]
+            return path
+        
+        # Expand children
+        for successor, action, cost in problem.getSuccessors(currState):
+            # Check if we have expanded this node before
+            if successor not in expanded:
+                expanded.add(successor)
+                stateStack.push(successor, cost)
+                stateStack.update(successor, cost)
+                parentMap[successor] = currState  
+                actions[successor] = action  
+                
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -173,7 +241,42 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stateStack = PriorityQueue()
+    expanded = set()
+    actions = {}
+    parentMap = {}
+    
+    # Initialize stack with starting position
+    startState = problem.getStartState()
+    stateStack.push(startState, 0)
+
+    # Add starting position to expanded set
+    expanded.add(startState)
+    
+    # While the graph is not empty
+    while not stateStack.isEmpty():
+        currState = stateStack.pop()
+        
+        if problem.isGoalState(currState):
+            # Try to construct a path to the goal
+            path = []
+            while currState != startState:
+                action = actions[currState]
+                path.insert(0, action)
+                currState = parentMap[currState]
+            # path.reverse()  
+            return path
+        
+        # Expand children
+        for successor, action, cost in problem.getSuccessors(currState):
+            # Check if we have expanded this node before
+            if successor not in expanded:
+                expanded.add(successor)
+                stateStack.push(successor, cost + heuristic(successor, problem)) # add heuristic output to the cost in the PriorityQueue
+                parentMap[successor] = currState  
+                actions[successor] = action  
+                
+    return []
 
 
 # Abbreviations
