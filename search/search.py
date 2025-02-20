@@ -120,37 +120,41 @@ def depthFirstSearch(problem):
     expanded = set()
     actions = {}
     parentMap = {}
-    
+
     # Initialize stack with starting position
     startState = problem.getStartState()
     stateStack.push(startState)
 
-    # Add starting position to expanded set
-    expanded.add(startState)
-    
-    # While the graph is not empty
     while not stateStack.isEmpty():
+        # Pop state
         currState = stateStack.pop()
-        
+
+        # If goal is reached, construct path
         if problem.isGoalState(currState):
-            # Try to construct a path to the goal
             path = []
-            while currState != startState:
-                action = actions[currState]
-                path.insert(0, action)
+            while currState in parentMap:
+                path.append(actions[currState])
                 currState = parentMap[currState]
+            path.reverse()
             return path
-        
-        # Expand children
-        for successor, action, empty in problem.getSuccessors(currState):
-            # Check if we have expanded this node before
+
+        # If already expanded, skip
+        if currState in expanded:
+            continue
+
+        # Mark as expanded
+        expanded.add(currState)
+
+        # Expand children in correct order (Up, Down, Right, Left)
+        for successor, action, _ in reversed(problem.getSuccessors(currState)):  # Reverse for correct DFS order
             if successor not in expanded:
-                expanded.add(successor)
                 stateStack.push(successor)
-                parentMap[successor] = currState  
-                actions[successor] = action  
-                
+                parentMap[successor] = currState
+                actions[successor] = action
+
     return []
+
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -175,10 +179,11 @@ def breadthFirstSearch(problem):
             # Try to construct a path to the goal
             path = []
             while currState != startState:
-                action = actions[currState]
-                path.insert(0, action)
+                path.append(actions[currState])
                 currState = parentMap[currState]
+            path.reverse()
             return path
+        
         
         # Expand children
         for successor, action, empty in problem.getSuccessors(currState):
@@ -193,43 +198,44 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    stateStack = PriorityQueue()
-    expanded = set()
+    stateQueue = PriorityQueue()  # UCS uses a priority queue
     actions = {}
     parentMap = {}
-    
-    # Initialize stack with starting position
-    startState = problem.getStartState()
-    stateStack.push(startState, 0)
+    costs = {}
 
-    # Add starting position to expanded set
-    expanded.add(startState)
-    
-    # While the graph is not empty
-    while not stateStack.isEmpty():
-        currState = stateStack.pop()
-        
+    # Initialize queue with starting position
+    startState = problem.getStartState()
+    stateQueue.push(startState, 0)
+    costs[startState] = 0  # Cost to reach start state is 0
+
+    while not stateQueue.isEmpty():
+        # Pop state with lowest cost
+        currState = stateQueue.pop()
+
+        # If goal is reached, construct path
         if problem.isGoalState(currState):
-            # Try to construct a path to the goal
             path = []
-            while currState != startState:
-                action = actions[currState]
-                path.insert(0, action)
+            while currState in parentMap:
+                path.append(actions[currState])
                 currState = parentMap[currState]
+            path.reverse()
             return path
-        
+
         # Expand children
         for successor, action, cost in problem.getSuccessors(currState):
-            # Check if we have expanded this node before
-            if successor not in expanded:
-                expanded.add(successor)
-                stateStack.push(successor, cost)
-                stateStack.update(successor, cost)
-                parentMap[successor] = currState  
-                actions[successor] = action  
+            newCost = costs[currState] + cost  # Accumulate total cost
+
+            # If successor has not been seen or we found a cheaper path
+            if successor not in costs or newCost < costs[successor]:
+                costs[successor] = newCost  # Update cost
+                parentMap[successor] = currState  # Track parent
+                actions[successor] = action  # Track action
                 
-    return []
+                # Push or update the priority queue with the lower cost
+                stateQueue.update(successor, newCost)
+
+    return []  # If goal not found, return empty path
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -241,42 +247,43 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    stateStack = PriorityQueue()
-    expanded = set()
+    stateQueue = PriorityQueue()  # UCS uses a priority queue
     actions = {}
     parentMap = {}
-    
-    # Initialize stack with starting position
-    startState = problem.getStartState()
-    stateStack.push(startState, 0)
+    costs = {}
 
-    # Add starting position to expanded set
-    expanded.add(startState)
-    
-    # While the graph is not empty
-    while not stateStack.isEmpty():
-        currState = stateStack.pop()
-        
+    # Initialize queue with starting position
+    startState = problem.getStartState()
+    stateQueue.push(startState, 0)
+    costs[startState] = 0  # Cost to reach start state is 0
+
+    while not stateQueue.isEmpty():
+        # Pop state with lowest cost
+        currState = stateQueue.pop()
+
+        # If goal is reached, construct path
         if problem.isGoalState(currState):
-            # Try to construct a path to the goal
             path = []
-            while currState != startState:
-                action = actions[currState]
-                path.insert(0, action)
+            while currState in parentMap:
+                path.append(actions[currState])
                 currState = parentMap[currState]
-            # path.reverse()  
+            path.reverse()
             return path
-        
+
         # Expand children
         for successor, action, cost in problem.getSuccessors(currState):
-            # Check if we have expanded this node before
-            if successor not in expanded:
-                expanded.add(successor)
-                stateStack.push(successor, cost + heuristic(successor, problem)) # add heuristic output to the cost in the PriorityQueue
-                parentMap[successor] = currState  
-                actions[successor] = action  
+            newCost = costs[currState] + cost  # Accumulate total cost
+
+            # If successor has not been seen or we found a cheaper path
+            if successor not in costs or newCost < costs[successor]:
+                costs[successor] = newCost  # Update cost
+                parentMap[successor] = currState  # Track parent
+                actions[successor] = action  # Track action
                 
-    return []
+                # Push or update the priority queue with the lower cost
+                stateQueue.update(successor, newCost + heuristic(successor, problem))
+
+    return []  # If goal not found, return empty path
 
 
 # Abbreviations
